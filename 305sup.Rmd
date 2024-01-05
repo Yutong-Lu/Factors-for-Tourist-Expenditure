@@ -1,0 +1,240 @@
+---
+title: "Supplementary Materials of STA305 Final Project"
+subtitle: "Factorial Design for Factors Affecting Total Tourist Expenditure"
+author: "Yutong Lu 1005738356, Sec L0201 "
+date: 2022-04-08
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r, message=FALSE, echo=FALSE}
+library(tidyverse)
+library(kableExtra)
+library(FrF2)
+library(car)
+library(BsMD)
+```
+
+```{r, echo=FALSE}
+# generate data
+A <- rep(c(-1,1),8)
+B <- rep(c(-1,-1,1,1),4)
+C <- rep(c(rep(-1,4),rep(1,4)), 2)
+D <- c(rep(-1,8),rep(1,8))
+
+combination <- c('(1)','a','b','ab','c','ac','bc','abc',
+                 'd','ad','bd','abd','cd','acd','bcd','abcd')
+
+# confounding with ABCD
+rep1 <- data.frame(cbind(combination,A,B,C,D))
+# L = x1 + x2 + x3 + x4
+L1 <- ((rep1$A == 1) + (rep1$B == 1) + (rep1$C == 1) +
+        (rep1$D == 1)) %% 2
+rep1$block <- ifelse(L1 == 0, "1", "2")
+
+# confounding with ABC
+rep2 <- data.frame(cbind(combination,A,B,C,D))
+# L = x1 + x2 + x3
+L2 <- ((rep2$A == 1) + (rep2$B == 1) + (rep2$C == 1)) %% 2
+rep2$block <- ifelse(L2 == 0, "1", "2")
+
+# confounding with ABD
+rep3 <- data.frame(cbind(combination,A,B,C,D))
+# L = x1 + x2 + x4
+L3 <- ((rep3$A == 1) + (rep3$B == 1) + (rep3$D == 1)) %% 2
+rep3$block <- ifelse(L3 == 0, "1", "2")
+
+# confounding with ACD
+rep4 <- data.frame(cbind(combination,A,B,C,D))
+# L = x2 + x3 + x4
+L4 <- ((rep4$A == 1) + (rep4$C == 1) + (rep4$D == 1)) %% 2
+rep4$block <- ifelse(L4 == 0, "1", "2")
+
+# confounding with BCD
+rep5 <- data.frame(cbind(combination,A,B,C,D))
+# L = x2 + x3 + x4
+L5 <- ((rep5$B == 1) + (rep5$C == 1) + (rep5$D == 1)) %% 2
+rep5$block <- ifelse(L5 == 0, "1", "2")
+
+design <- cbind(rep1, rep2$block, rep3$block, rep4$block, rep5$block)
+```
+
+```{r,include=FALSE}
+# install.packages('conf.design')
+library(conf.design)
+d24 <- conf.design(c(A = 0, B = 1, C = 1 , D = 1), p = 2)
+d24
+```
+
+```{r, echo=FALSE}
+set.seed(356)
+mut <- function(df) {
+  # generate grand mean and error
+  grand_mean <- 500
+  error <- rnorm(16, mean = 0, sd = 100)
+  
+  # define the main effects and interaction effects
+  # assuming that the main effects are the greatest and,
+  # lower order interactions have greater effects
+  a <- 1050
+  b <- 900
+  ab <- 700
+  c <- 800
+  ac <- 500
+  bc <- 110
+  abc <- 60
+  d <- 850
+  ad <- 550
+  bd <- 130
+  abd <- 85
+  cd <- 100
+  acd <- 80
+  bcd <- 70
+  abcd <- 10
+  
+  df %>% 
+    mutate(response = case_when(
+      combination == "(1)" ~ (grand_mean + 0),
+      combination == "a" ~ (grand_mean + a),
+      combination == "b" ~ (grand_mean + b),
+      combination == "ab" ~ (grand_mean + a+b+ab),
+      combination == "c" ~ (grand_mean + c),
+      combination == "ac" ~ (grand_mean + a+c+ac),
+      combination == "bc" ~ (grand_mean + b+c+bc),
+      combination == "abc" ~ (grand_mean + a+b+c+ab+ac+bc+abc),
+      combination == "d" ~ (grand_mean + d),
+      combination == "ad" ~ (grand_mean + a+d+ad),
+      combination == "bd" ~ (grand_mean + b+d+bd),
+      combination == "abd" ~ (grand_mean + a+b+d+ab+ad+bd+abd),
+      combination == "cd" ~ (grand_mean + c+d+cd),
+      combination == "acd" ~ (grand_mean + a+c+d+ac+ad+cd+acd),
+      combination == "bcd" ~ (grand_mean + b+c+d+bc+bd+cd+bcd),
+      combination == "abcd" ~ (grand_mean + a+b+c+d+ab+ac+ad+bc+bd+cd+abc+abd+bcd+abcd))) %>% 
+    mutate(response = response + error)
+}
+
+result <- lapply(list(rep1, rep2, rep3, rep4, rep5), mut)
+
+df <- rbind(result[[1]], result[[2]], result[[3]], result[[4]], result[[5]])
+df$block <- as.factor(df$block)
+df$run <- 1:80
+df <- df[,c(8,1,2,3,4,5,6,7)]
+df$A <- as.factor(df$A)
+df$B <- as.factor(df$B)
+df$C <- as.factor(df$C)
+df$D <- as.factor(df$D)
+```
+
+```{r}
+grand_mean <- 500
+a <- 1050
+b <- 900
+ab <- 700
+c <- 800
+ac <- 500
+bc <- 110
+abc <- 60
+d <- 850
+ad <- 550
+bd <- 130
+abd <- 85
+cd <- 100
+acd <- 80
+bcd <- 70
+abcd <- 10
+  
+sim <- data.frame(name = c("grand mean",
+                           "a","b","ab","c","ac","bc","abc","d",
+                           "ad","bd","abd","cd","acd","bcd","abcd"),
+                  val = c(grand_mean,
+                          a,b,ab,c,ac,bc,abc,d,ad,bd,abd,cd,acd,bcd,abcd))
+```
+
+```{r}
+sim %>% 
+  kable(
+      booktabs = T,
+      align = "c",
+      linesep = "",
+      caption =  "Values of effects and interactions in data simulation.",
+      col.names = c("Term","Inputted value")) %>%
+  kable_styling("striped",
+                font_size = 10,
+                latex_options = "HOLD_position")
+```
+
+```{r}
+fact.mod <- lm(response~block+A*B*C*D,data=df)
+mod1sum <- data.frame(
+  coef = round(summary(fact.mod)$coef[-c(2),1],3),
+  se = round(summary(fact.mod)$coef[-c(2),2],3),
+  eff = c("-",round(2*summary(fact.mod)$coef[-c(1,2),1],3)),
+  p = round(summary(fact.mod)$coef[-c(2),4],3))
+
+mod1sum %>% 
+    kable(booktabs = T,
+        align = "c",
+        linesep = "",
+        caption =  "Summary of the initial model.",
+        col.names = c("Coefficient Estimate","Standard Error",
+                      "Effect Estimate","p-Value")) %>%
+  kable_styling("striped", full_width = F,
+                latex_options = c("HOLD_position"))
+```
+
+```{r, echo=FALSE}
+new.mod <- lm(response~block+A+B+C+D+A:B+A:C+A:D+B:C+B:D+C:D,data=df)
+options(scipen = 999)
+round(anova(new.mod),6) %>% 
+  kable(booktabs = T,
+        align = "c",
+        linesep = "",
+        caption =  "Analysis of Variance for new model with only active effects and interactions.",
+        col.names = c("Degree of freedom","Sum of squares","Mean sum of squares","F value","p-Value")) %>%
+  kable_styling("striped", full_width = F,
+                latex_options = c("HOLD_position"))
+```
+
+```{r, fig.cap="Residuals vs. Fitted for the initial model"}
+plot(fact.mod$fitted.values,fact.mod$residuals,
+     xlab="Fitted Values",ylab="Residuals")
+abline(h=0, lty=2)
+```
+
+```{r, fig.cap="Residuals vs. Fitted for new model"}
+plot(new.mod$fitted.values,new.mod$residuals,
+     xlab="Fitted Values",ylab="Residuals")
+abline(h=0, lty=2)
+```
+
+
+```{r, include=F,fig.height=4}
+par(mfrow=c(2,2))
+plot(fact.mod$fitted.values,fact.mod$residuals,
+     xlab="Fitted Values",ylab="Residuals",main = "Initial model")
+abline(h=0, lty=2)
+plot(new.mod$fitted.values,new.mod$residuals,
+     xlab="Fitted Values",ylab="Residuals", main = "New model")
+abline(h=0, lty=2)
+qqPlot(fact.mod$residuals, ylab = "Residuals", id = F, main = "Initial model",
+       pch = 20, cex =0.7)
+qqPlot(new.mod$residuals, ylab = "Residuals", id = F, main = "New model", 
+       pch = 20, cex =0.7 )
+```
+\newpage
+# Simulated data
+```{r}
+df%>% 
+  kable(booktabs = T,
+        longtable = TRUE,
+        align = "c",
+        linesep = "",
+        caption =  "Simulated Data") %>% 
+    kable_styling("striped",
+                latex_options = c("HOLD_position", "repeat_header"))
+```
+
+

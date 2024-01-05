@@ -1,0 +1,277 @@
+---
+title: \vspace{-2cm} Factorial Design for Factors Affecting Total Tourist Expenditure 
+subtitle: "STA305 H1S Sec L0201, W2022"
+author: "Yutong Lu 1005738356"
+date: 2022-04-08
+lang: "en"
+output: 
+  pdf_document
+---
+\vspace{-1cm}
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Introduction
+
+With the lifting of COVID-19 restriction in many areas, tourism is expected to recover from the effects brought by the global pandemic, including the restrictions on hotels, travelling, restaurants and recreation. According to Marrocu, Paci and Zara (2015), tourist income, foreign nationality and employment status have significant effects on the tourist expenditure. Another study agreed with the effect of country of origin but also found trip length, family travelling, first visit and activity participation also have prominent roles on the total expenditure (Almeida & Garrod, 2017). However, Vieira and Santos (2012) did not find the effect of length of stay significant, rather they concluded that the number of areas visited has a greater influence on the money spent, which may correspond to the effect of pursued activities. 
+
+Therefore, the research question is whether having a foreign nationality, travelling with family, first visit and the activity level of the visit can influence the total tourist expenditure. Based on the literature, we hypothesized that being a foreign tourist, travelling with family, first visit of the area and being an active visitor have important impacts on total expenditure. We aimed to investigate the main effects and interactions of nationality, travelling with family, first visit and activity level on the total tourist expenditure. This study is important because we can provide tourists, business owners, and policymakers with a clearer idea about the important factors on tourist expenditure and help them improve their experience and business as we are moving towards a post-pandemic world.
+
+
+## Materials and Methods
+
+```{r, message=FALSE, echo=FALSE}
+library(tidyverse)
+library(kableExtra)
+library(FrF2)
+library(car)
+library(BsMD)
+```
+
+#### Experimental Design and Data
+
+The four factors in this design are foreign nationality, travelling with family, first visit and activity level, each with two levels corresponding to true and false, or low and high. The response in this study is the total tourist expenditure, measured in CAD. Because some areas have higher or lower prices due to regional differences, there are also two blocks in this design. Because the objective was to identify significant main effects and interactions, we constructed a $2^4$ factorial design with two blocks of size 8, confounded with higher-order interactions. Because there was no prior estimate of error and no available evidence supporting that some interactions are negligible, the design was replicated five times to obtain an estimate of error. We also used a partial confounded approach (Yates, 1937), where in each of the five replicates, the blocking was confounded with a different interaction. Note that no main effects were used for confounded with blocks.
+
+We denoted having a foreign nationality as factor A, travelling with family as factor B, first visit as factor C and the activity level as factor D. Each factor A, B, C, and D had two levels, -1 and 1. For factor A, level -1 represented the tourist stayed within the country of residence, whereas level 1 represented that the tourist was from a foreign country. Level -1 of factor B represented the tourist was not travelling with family, and level 1 represented the tourist was travelling with family members. Factor C level -1 represented the tourist who had visited the area before, and level 1 represented that the tourist was a first-time traveller to this place. For factor D, level -1 represented the tourist was not active, whereas level 1 represented the tourist was actively pursuing activities during the trip. The five replicates were denoted as replicate I, II, III, IV and V.
+
+Higher-order interactions are usually deemed as either negligible or less important relative to the lower-order interactions and main effects (Montgomery, 2020). Thus, in this experimental design, we chose the highest two orders of interactions ABCD, ABC, ABD, ACD and BCD to be confounded with blocks in the five replicates I, II, III, IV, and V, respectively. Under this design, the information of ABC could be obtained from replicates I, III, IV, and V; ABD interaction information can be obtained from replicates I, II, IV, and V; ACD information could be obtained from I, II, III, and V; BCD information could be obtained from replicates I, II, III, and IV; and the information of interaction ABCD can be obtained from replicates II, III, IV, and V. Thus, we created the column for blocking (either Block 1 or Block 2) using a defining contrast $$L=\alpha_1x_1+\alpha_2x_2+\alpha_3x_3+\alpha_4x_4$$ where $x_i = 0$ indicates the low level of the $i$-th factor and $x_i = 1$ indicates the high level of the $i$-th factor. $\alpha_i=0,\ 1$ for $i=1,2,3,4$ is the exponent of $x_i$ in a certain combination of $A^{\alpha_1}B^{\alpha_2}C^{\alpha_3}D^{\alpha_4}$. For the five replicates, we used five different defining contrasts depending on the confounding interaction. For example, in replicate II where ABC was confounded with blocks, $L=\alpha_1x_1+\alpha_2x_2+\alpha_3x_3$. Then, we calculated $L$ for each combination and evaluated $L \ mod \ 2$. Combinations with $L \ mod \ 2 = 0$ were set to be in Block 1 and those with $L \ mod \ 2 = 1$ were set to be in Block 2. 
+
+We then simulated data for the design. Based on the literature, foreign tourists, travelling with family, first-time visitors and high activity levels all can positively affect the total expenditure (Marrocu, Paci & Zara, 2015; see also Almeida & Garrod, 2017; Vieira & Santos, 2012). As a result, we arbitrarily inputted values for the grand mean and each of the main effects and interactions based on literature evidence (*Supplementary Table 1*). As suggested in the literature, any interactions with the factor A representing foreign travelers were inputted with greater values for effect. Also, second and third-order interactions were inputted with smaller effect values because they were considered as less important (Montgomery, 2020). We also randomly generalized errors from a Normal distribution with a mean of 0 and a standard deviation of 100. The response for each of the combinations in the four replicates was then generated by adding up the corresponding main effects, interactions and the random error. 
+
+#### Statistical analysis
+
+With the simulated data, we fitted a linear regression model using the total tourist expenditure as the response, the four factors A, B, C and D for main effects, interactions and block effects as follows: $$\hat{y}=\hat{\beta_0}+\hat{\beta_1}x_1+\hat{\beta_2}x_2+...+\hat{\beta}_{1234}x_1x_2x_3x_4$$ where $x_i, \ i =1,..,4$ indicates the four factors A, B, C, and D. $\hat{\beta}_0$ is the intercept and $\hat{\beta}_1,...,\hat{\beta}_{1234}$ are the coefficient estimates. Then, we would check the estimated coefficients and calculate the factorial effect estimates by multiplying the corresponding coefficient estimates by 2. Note that the estimated intercept $\hat{\beta_0}$ itself is the estimated grand mean $\hat{\mu}$. However, because we arbitrarily inputted values for main effects and interactions, the focus of our study was not on the effects estimates but rather on the analysis of variance.
+
+Therefore, we checked the source of variance and the degrees of freedom using the ANOVA table. We partitioned the total degrees of freedom to replicates, blocks within replicates, main effects and interactions, and error. Then, we calculated the sum of squares of replicates using $SS_{rep}=\sum^{n}_{h=1}\frac{R^2_h}{2^k}-\frac{y^2_{...}}{N}$ where $R_h$ is the sum of response for the $h$th replicate, $k$ is the number of factors, $y^2_{...}$ is the squared sum of all responses and $N$ is the total number of observations. We also calculated sum of squares for blocks and error using $\ SS_{block}=SS_{ABCD, \ rep I}+SS_{ABC, \ rep II}+SS_{ABD, \ rep III}+SS_{ACD, \ rep IV}+SS_{BCD, \ rep V}$ and $SS_{error}=SS_{total}-SS_{rep}-SS_{block}-SS_{A}-...-SS_{ABCD}-SS_{error}$. Note that the total sum of square was obtained by summing up all the sums of squares in the ANOVA table.
+
+According to Montgomery (2020), normal or half-normal plots and Lenth's method are analysis procedures for unreplicated two-level factorial design. Because there were five replicates in our study, it was not appropriate to use normal plots or Lenth plots to identify active main effects and interactions. As a result, we would only find the significant main effects and interactions by checking the p-values in the ANOVA table and identifying any significant terms with p-values smaller than a significance level of 0.05. We would then fit these significant effects and interactions into a new linear regression model and check ANOVA table again to see whether the main effects and interactions are still important. Finally, for both the initial model and the new model, we checked the model assumptions of heterogeneity of error variance and error normality using residual plot and Normal quantile-quantile plot. If the assumptions were satisfied, we would expect no patterns in the residual plot and the point in the Normal quantile-quantile plot to align closely with the diagonal line within the boundaries.
+
+
+```{r, echo=FALSE}
+# generate data
+A <- rep(c(-1,1),8)
+B <- rep(c(-1,-1,1,1),4)
+C <- rep(c(rep(-1,4),rep(1,4)), 2)
+D <- c(rep(-1,8),rep(1,8))
+
+combination <- c('(1)','a','b','ab','c','ac','bc','abc',
+                 'd','ad','bd','abd','cd','acd','bcd','abcd')
+
+# confounding with ABCD
+rep1 <- data.frame(cbind(combination,A,B,C,D))
+# L = x1 + x2 + x3 + x4
+L1 <- ((rep1$A == 1) + (rep1$B == 1) + (rep1$C == 1) +
+        (rep1$D == 1)) %% 2
+rep1$block <- ifelse(L1 == 0, "1", "2")
+
+# confounding with ABC
+rep2 <- data.frame(cbind(combination,A,B,C,D))
+# L = x1 + x2 + x3
+L2 <- ((rep2$A == 1) + (rep2$B == 1) + (rep2$C == 1)) %% 2
+rep2$block <- ifelse(L2 == 0, "1", "2")
+
+# confounding with ABD
+rep3 <- data.frame(cbind(combination,A,B,C,D))
+# L = x1 + x2 + x4
+L3 <- ((rep3$A == 1) + (rep3$B == 1) + (rep3$D == 1)) %% 2
+rep3$block <- ifelse(L3 == 0, "1", "2")
+
+# confounding with ACD
+rep4 <- data.frame(cbind(combination,A,B,C,D))
+# L = x2 + x3 + x4
+L4 <- ((rep4$A == 1) + (rep4$C == 1) + (rep4$D == 1)) %% 2
+rep4$block <- ifelse(L4 == 0, "1", "2")
+
+# confounding with BCD
+rep5 <- data.frame(cbind(combination,A,B,C,D))
+# L = x2 + x3 + x4
+L5 <- ((rep5$B == 1) + (rep5$C == 1) + (rep5$D == 1)) %% 2
+rep5$block <- ifelse(L5 == 0, "1", "2")
+
+design <- cbind(rep1, rep2$block, rep3$block, rep4$block, rep5$block)
+```
+
+```{r, echo=FALSE}
+kable(design,
+      booktabs = T,
+      align = "c",
+      linesep = "",
+      caption =  "Partially Confounded $2^4$ Design with 5 Replicates.",
+      col.names = c("Combination","A","B","C","D",
+                    "Block","Block","Block","Block","Block")) %>%
+  kable_styling("striped", full_width = F,
+                latex_options = c("HOLD_position", "scale_down")) %>%
+  add_header_above(c(" " = 5, 
+                     "Replicate I \n ABCD Confounded" = 1, 
+                     "Replicate II \n ABC Confounded" = 1, 
+                     "Replicate III \n ABD Confounded" = 1,
+                     "Replicate IV \n ACD Confounded" = 1,
+                     "Replicate V \n BCD Confounded" = 1))
+```
+
+```{r, echo=FALSE}
+set.seed(356)
+mut <- function(df) {
+  # generate grand mean and error
+  grand_mean <- 500
+  error <- rnorm(16, mean = 0, sd = 100)
+  
+  # define the main effects and interactions
+  # assuming that the main effects are the greatest and,
+  # lower order interactions have greater effects
+  a <- 1050
+  b <- 900
+  ab <- 700
+  c <- 800
+  ac <- 500
+  bc <- 110
+  abc <- 60
+  d <- 850
+  ad <- 550
+  bd <- 130
+  abd <- 85
+  cd <- 100
+  acd <- 80
+  bcd <- 70
+  abcd <- 10
+  
+  df %>% 
+    mutate(response = case_when(
+      combination == "(1)" ~ (grand_mean + 0),
+      combination == "a" ~ (grand_mean + a),
+      combination == "b" ~ (grand_mean + b),
+      combination == "ab" ~ (grand_mean + a+b+ab),
+      combination == "c" ~ (grand_mean + c),
+      combination == "ac" ~ (grand_mean + a+c+ac),
+      combination == "bc" ~ (grand_mean + b+c+bc),
+      combination == "abc" ~ (grand_mean + a+b+c+ab+ac+bc+abc),
+      combination == "d" ~ (grand_mean + d),
+      combination == "ad" ~ (grand_mean + a+d+ad),
+      combination == "bd" ~ (grand_mean + b+d+bd),
+      combination == "abd" ~ (grand_mean + a+b+d+ab+ad+bd+abd),
+      combination == "cd" ~ (grand_mean + c+d+cd),
+      combination == "acd" ~ (grand_mean + a+c+d+ac+ad+cd+acd),
+      combination == "bcd" ~ (grand_mean + b+c+d+bc+bd+cd+bcd),
+      combination == "abcd" ~ (grand_mean + a+b+c+d+ab+ac+ad+bc+bd+cd+abc+abd+bcd+abcd))) %>% 
+    mutate(response = response + error)
+}
+
+result <- lapply(list(rep1, rep2, rep3, rep4, rep5), mut)
+
+df <- rbind(result[[1]], result[[2]], result[[3]], result[[4]], result[[5]])
+df$rep <- rep(1:5, each = 16)
+df$block <- as.factor(df$block)
+df$run <- 1:80
+df <- df[,c(8,1,2,3,4,5,6,7)]
+df$A <- as.factor(df$A)
+df$B <- as.factor(df$B)
+df$C <- as.factor(df$C)
+df$D <- as.factor(df$D)
+```
+
+## Results and Discussion
+
+The final factorial design is displayed in Table 1. After inputting and simulating data (*Supplementary Table 1, 4*), we fitted the factors A, B, C, D and the block into a linear regression model. The model summary shows that all the estimated main effects and the more important first-order interactions are positive, which is consistent with our simulation and literature evidence (*Supplementary Table 2*). As seen in Table 2, the total degrees of freedom is $N-1=2^4\times5-1=79$. Each main effect and interaction has 1 degree of freedom, summing up to be 15 degrees of freedom for the 15 possible combinations. The remaining degrees of freedom can be partitioned into 4 degrees of freedoms for replicates, 5 degrees of freedoms for blocks within replicates, and 55 degrees of freedoms for error.
+
+```{r}
+fact.mod <- lm(response~block+A*B*C*D,data=df)
+```
+
+```{r}
+# SStotal
+SStotal <- sum(anova(fact.mod)[,2])
+
+# SSrep
+
+SSrep <- (sum(df$response[df$rep == 1])^2 + 
+            sum(df$response[df$rep == 2])^2 + 
+            sum(df$response[df$rep == 3])^2 + 
+            sum(df$response[df$rep == 4])^2 + 
+            sum(df$response[df$rep == 5])^2)/(2^4) - sum(df$response)^2/80
+
+# SSblock
+
+#SSABCD in rep 1
+SSABCD <- (sum(df$response[df$rep == 1 & df$block == 1]) - sum(df$response[df$rep == 1 & df$block == 2]))^2/2^4
+#SSABC in rep 2
+SSABC <- (sum(df$response[df$rep == 2 & df$block == 2]) - sum(df$response[df$rep == 2 & df$block == 1]))^2/2^4
+#SSABD in rep 3
+SSABD <- (sum(df$response[df$rep == 3 & df$block == 2]) - sum(df$response[df$rep == 3 & df$block == 1]))^2/2^4
+#SSACD in rep 4
+SSACD <- (sum(df$response[df$rep == 4 & df$block == 2]) - sum(df$response[df$rep == 4 & df$block == 1]))^2/2^4
+#SSBCD in rep 5
+SSBCD <- (sum(df$response[df$rep == 5 & df$block == 2]) - sum(df$response[df$rep == 5 & df$block == 1]))^2/2^4
+
+SSblock <- SSABCD+SSABC+SSABD+SSACD+SSBCD
+
+# SSeffects
+SSeff <- sum(anova(fact.mod)[-c(1,17),2])
+
+# SSerror
+SSerror <- SStotal - SSrep - SSblock - SSeff
+```
+
+
+```{r, echo=FALSE}
+tb <- data.frame(var = c(
+  "Replicates", "Blocks within replicates","A","B","C","D","AB","AC","AD","BC","BD","CD",
+  "ABC (from replicates I, III, IV, and V)","ABD (from replicates I, II, IV, and V)", 
+  "ACD (from replicates I, II,III, and V)","BCD (from replicates I, II, III, and IV)",
+  "ABCD (from replicates II, III, IV, and V)","Error","Total"),
+                    ss = round(c(SSrep, SSblock, 
+                                 anova(fact.mod)[-c(1,17),2],
+                                 SSerror,SStotal),3),
+                    df = c(4,5,anova(fact.mod)[-c(1,17),1],55,79),
+                    ms = c(round(SSrep/4, 3),
+                           round(SSblock/5, 3), 
+                           round(anova(fact.mod)[-c(1,17),3],3), 
+                           round(SSerror/55,3), " "),
+                    f0 = c("-", "-", round(anova(fact.mod)[-c(1,17),4],3),
+                           " ", " "),
+                    p = c(" ", " ", rep("<0.001",6),0.005,"<0.001",0.005,
+                          "<0.001",round(anova(fact.mod)[c(12,13,14,15,16),5],3),
+                          " ", " "),
+                 stringsAsFactors = FALSE)
+options(scipen = 999)
+kable(tb,
+      booktab = "T",
+      linesep = "",
+      caption = "Analysis of Variance Table",
+      col.names = c("Source of Variation", "Sum of Squares", 
+                    "Degrees of Freedom", "Mean Square","$F_0$","$P$-Value"),
+      align="lrcrcc", escape = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"),
+                latex_options = c("HOLD_position"),
+                font_size = 8)
+```
+
+We then calculated the sums of squares using the expressions specified in the Methods section, and divided them by the corresponding degree of freedoms to obtain mean squares, as seen in Table 2. It appears that A, B, C, D, AB, AC, AD, BC, BD, and CD have p-values smaller than a significance level of 0.05, so we may conclude that the main effects of A, B, C, D and their first-order interactions are important to total tourist expenditure. This is expected based on our data simulation and the idea that lower-order interactions are of higher importance compared to higher-order interactions. Then, we fitted the significant main effects, their first-order interactions and the block effect into a new model. Using a significance level of 0.05, resulted ANOVA table suggests that they are indeed all significant with p values for all main effects and interactions smaller than 0.05 except for block. However, among all interactions, AB, AC and AD have the smallest p-values ($p<0.001$), which means that they will still be considered as significant even if we use a smaller significance level (*Supplementary Table 3*). Factor A represents foreign nationality, so this is in line with our simulation and literature evidence, where foreign nationality was considered as an important factor in tourist expenditure (Marrocu, Paci & Zara, 2015; see also Almeida & Garrod, 2017; Vieira & Santos, 2012).
+
+```{r, echo=FALSE,results='hide',fig.keep='all', warning = F, fig.width=12, fig.height=2.97}
+new.mod <- lm(response~block+A+B+C+D+A:B+A:C+A:D+B:C+B:D+C:D,data=df)
+nf <- layout(matrix(c(1,2),ncol=2),widths=c(4,4), heights=c(2,2), TRUE)
+par(mfrow=c(1,2), mar=c(4,4,1,2), cex.axis=1, cex.lab=1, cex.main=1.2, cex.sub=1)
+qqPlot(fact.mod$residuals, ylab = "Residuals", id = F, main = "Initial model",
+       pch = 20, cex =0.7)
+qqPlot(new.mod$residuals, ylab = "Residuals", id = F, main = "New model", 
+       pch = 20, cex =0.7 )
+```
+
+To check the results' validity, we examined the assumptions for both initial and new linear models using residual plots and Normal quantile-quantile plots. Upon inspection, there appears to be no particular pattern such as fanning in the residual plots for both models (*Supplementary Figure 1 & 2*). However, although points in both Normal quantile-quantile plots above are mostly lying within the boundaries around the line, the points in the new model Q-Q plot appear to align closer with the diagonal line than the points from the initial model. Thus, we could conclude that there are no obvious violations of assumptions in both models, but the new model seems to be better because it satisfies the normality assumption better. Therefore, based on the results, we can conclude that foreign nationality, travelling with family, first-time visiting, activity level, and their first-order interactions are significant to the total tourist expenditure. 
+
+## Conclusion
+
+In conclusion, this study set out to investigate which main effects and interactions of factors foreign nationality, family travelling, first-time visit and activity level have significant impact on the total tourist expenditure, through a $2^4$ factorial design with partial blocking and data simulation. The results suggest that all four main effects and their first-order interactions, especially for the interactions that involve foreign nationality, are significant, which are in line with our design, data simulation and literature evidence. Also, we failed to reject our hypothesis that these factors are important to the total tourist expenditure.
+
+## References
+
+Almeida, A. & Garrod, B. (2017). Insights from analysing tourist expenditure using quantile regression. _Tourism Economics: the Business and Finance of Tourism and Recreation, 23_(5), 1138–1145. https://doi.org/10.1177/1354816616668108
+
+Marrocu, E., Paci, R., & Zara, A. (2015). Micro-economic determinants of tourist expenditure: A quantile regression approach. _Tourism Management, 50_, 13–30. https://doi.org/10.1016/j.tourman.2015.01.006
+
+Montgomery, D. C. (2020). Design and analysis of Experiments (10th ed.). Wiley. 
+
+Santos, & Vieira, J. C. (2012). An Analysis of Visitors’ Expenditures in a Tourist Destination: OLS, Quantile Regression and Instrumental Variable Estimators. _Tourism Economics: the Business and Finance of Tourism and Recreation, 18_(3), 555–576. https://doi.org/10.5367/te.2012.0133
+
+
